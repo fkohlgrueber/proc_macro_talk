@@ -3,12 +3,11 @@ extern crate proc_macro;
 
 use syn::Token;
 use syn::parse::{Parse, ParseStream};
-use quote::{quote, quote_spanned};
+use quote::quote;
 use quote::{TokenStreamExt, ToTokens};
 use proc_macro2::TokenStream;
 use syn::parenthesized;
 use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
 
 #[derive(Debug)]
 struct Grammar {
@@ -122,8 +121,8 @@ impl ToTokens for GrammarDef {
    fn to_tokens(&self, tokens: &mut TokenStream) {
         let name = &self.name;
         let variants = self.variants.iter();
-        tokens.append_all(quote_spanned!( self.name.span() => pub enum #name ));
-        tokens.append_all(quote_spanned!( self.variants.span() => { #(#variants),* } ));
+        tokens.append_all(quote!( pub enum #name ));
+        tokens.append_all(quote!( { #(#variants),* } ));
     }
 }
 
@@ -137,9 +136,7 @@ impl ToTokens for GrammarVariant {
 impl ToTokens for GrammarArgs {
    fn to_tokens(&self, tokens: &mut TokenStream) {
         let args = self.args.iter();
-        tokens.append_all(quote_spanned!(
-            self.paren_token.span => (#(#args),*)
-        ))
+        tokens.append_all(quote!( (#(#args),*) ))
     }
 }
 
@@ -147,9 +144,9 @@ impl ToTokens for GrammarArg {
    fn to_tokens(&self, tokens: &mut TokenStream) {
         let name = &self.name;
         let ty = match &self.rep_type {
-            GrammarRepType::None => quote_spanned!(name.span() => Box<#name>),
-            GrammarRepType::Optional(tok) => quote_spanned!(try_join(name, tok) => Option<Box<#name>>),
-            GrammarRepType::Repetition(tok) => quote_spanned!(try_join(name, tok) => Vec<#name>),
+            GrammarRepType::None => quote!(Box<#name>),
+            GrammarRepType::Optional(_tok) => quote!(Option<Box<#name>>),
+            GrammarRepType::Repetition(_tok) => quote!(Vec<#name>),
         };
         tokens.append_all(ty);
     }
@@ -167,8 +164,4 @@ pub fn grammar(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     }
     
     quote!(#syntax_tree).into()
-}
-
-fn try_join<A: Spanned, B: Spanned>(a: A, b: B) -> proc_macro2::Span {
-    a.span().join(b.span()).unwrap_or(a.span())
 }
