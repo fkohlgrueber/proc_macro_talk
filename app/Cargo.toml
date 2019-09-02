@@ -6,4 +6,4 @@ edition = "2018"
 
 [dependencies]
 
-grammar-macro = { path = "../grammar-macro" }
+simple-macro = { path = "../simple-macro" }

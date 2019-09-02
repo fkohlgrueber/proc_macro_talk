@@ -1,25 +1,11 @@
-use grammar_macro::grammar;
+use simple_macro::my_macro;
 
-grammar!{
-    Expr = If(Expr, BlockType, Expr?)
-         | Block_(BlockType)
-
-    BlockType = Block(Stmt*)
-
-    Lit = Char(char)
-        | Bool(bool)
-
-    Stmt = Expr(Expr)
-         | Semi(Expr)
-}
-
-
-
-
-grammar!{
-    Expr2 = Wohoo(&'static str*) 
-          | Blub(std::collections::HashMap<String, usize>?)
+my_macro!{
+    fn say_hello() {
+        println!("Hello World!")
+    }
 }
 
 fn main() {
+    say_hello();
 }
